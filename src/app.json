@@ -1,0 +1,10 @@
+{
+  "pages": [
+    "pages/indexList/index",
+    "pages/internal/index",
+    "pages/orderBuy/index",
+    "pages/address/index",
+    "pages/payment/index"
+  ],
+  "lazyCodeLoading": "requiredComponents"
+}
