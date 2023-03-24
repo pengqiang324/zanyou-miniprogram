@@ -1,4 +1,5 @@
 import { setError } from './error'
+import qs from 'qs'
 
 function formatNumber (n) {
   const str = n.toString()
@@ -25,6 +26,7 @@ export const fmoney = (s, n = 2) => {
   let t = ''
   if (n) {
     s = parseFloat((s + '').replace(/[^\d\.-]/g, '')).toFixed(n) + ''
+    // eslint-disable-next-line one-var
     let l = s
         .split('.')[0]
         .split('')
@@ -64,6 +66,18 @@ export function handleError (response) {
 export function showToast (title, success = false) {
   success ? mpvue.showToast({ title })
     : mpvue.showToast({ title, icon: 'none' })
+}
+
+// 解码,try处理多次编码的情况
+export function decodeUrl (str) {
+  var data = decodeURIComponent(str)
+  var json = null
+  try {
+    json = qs.parse(data)
+    return json
+  } catch (e) {
+    console.log('发生了错误：', e)
+  }
 }
 
 export default {

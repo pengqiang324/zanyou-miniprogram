@@ -155,6 +155,7 @@ export function getUserInfo (onSuccess, onFail) {
 
 export function setStorageSync (key, data) {
   const wx = () => {
+    console.log(key, data)
     mpvue.setStorageSync(key, data)
   }
   const my = () => {
@@ -369,51 +370,59 @@ export function getAddressList(list, cb) {
  * @Author pengqiang
  * @Date 2021/10/28 15:08
 */
-export function tradePay({ data, success, fail, complete }) {
+export function tradePay ({ data, success, fail, complete }) {
   const wx = () => {
-    if (!data.paySign || 
-        !data.tradeNo || 
-        !data.nonceStr ) {
-        showAlert({ content: '参数有误！' })
-        complete && complete()
-        return
+    if (!data.paySign ||
+        !data.tradeNo ||
+        !data.nonceStr ||
+        !data.signType) {
+      showAlert({ content: '参数有误！' })
+      complete && complete()
+      return
     }
+    console.log('参数', {
+      timeStamp: data.timeStamp,
+      nonceStr: data.nonceStr,
+      package: data.tradeNo, // 随机字符串
+      signType: data.signType,
+      paySign: data.paySign // 签名
+    })
     mpvue.requestPayment({
       timeStamp: data.timeStamp,
       nonceStr: data.nonceStr,
       package: data.tradeNo, // 随机字符串
-      signType: 'MD5',
+      signType: data.signType,
       paySign: data.paySign, // 签名
-      success(res) {
+      success (res) {
         console.log('成功')
         success && success(res)
       },
-      fail(res) {
+      fail (res) {
         console.log('发生了错误', res)
         fail && fail(res)
       },
-      complete() {
+      complete () {
         complete && complete()
       }
     })
   }
   const my = () => {
-    if (!data.tradeNO) {
-        showAlert({ content: '参数有误！' })
-        return
+    if (!data) {
+      showAlert({ content: '参数有误！' })
+      return
     }
-      mpvue.tradePay({
-        // 调用统一收单交易创建接口（alipay.trade.create），获得返回字段支付宝交易号trade_no
-        tradeNO: data.tradeNO,
-        success: (res) => {
-          success && success(res)
-        },
-        fail: (res) => {
-          fail && fail(res)
-        },
-        complete: () => {
-          complete && complete()
-        }
+    mpvue.tradePay({
+      // 调用统一收单交易创建接口（alipay.trade.create），获得返回字段支付宝交易号trade_no
+      tradeNO: data,
+      success: (res) => {
+        success && success(res)
+      },
+      fail: (res) => {
+        fail && fail(res)
+      },
+      complete: () => {
+        complete && complete()
+      }
     });
   }
   adapter({ wx, my })

@@ -10,6 +10,7 @@ import {
     tradePay
 } from './api/wechat'
 import { request } from '@/utils/request'
+import { base64Decode, decodeUrl } from '@/utils'
 
 export default {
   created () {
@@ -23,18 +24,30 @@ export default {
      */
   },
   onLaunch(options) {
-    // 第一次打开 冷启动
-    if (options.query && Object.keys(options.query).length) {
-      setStorageSync('query', options.query)
-    } else {
-      mpvue.clearStorageSync() // 解决 2 次进入小程序保留上次订单记录，拉起支付
+    // 第一次打开 冷启动  微信热启动 onLaunch, onShow 都会执行
+    if (mpvuePlatform === 'my') {
+      console.log(111)
+      if (options.query && Object.keys(options.query).length) {
+        setStorageSync('query', options.query)
+      } else {
+        mpvue.clearStorageSync() // 解决 2 次进入小程序保留上次订单记录，拉起支付
+      }
     }
   },
   onShow(options) {
     // 从后台被 scheme 重新打开
     // 热启动 app 打开小程序
     if (options.query && Object.keys(options.query).length) {
-      setStorageSync('query', options.query)
+      let queryStorage = {}
+      if (mpvuePlatform === 'wx') {
+        const data = options.query.data
+        queryStorage = decodeUrl(data)
+        console.log('获取得到了数据：', queryStorage)
+      } else if (mpvuePlatform === 'my') {
+        queryStorage = options.query
+      }
+
+      setStorageSync('query', queryStorage)
     }
     const query = getStorageSync('query')
     this.getAuthCode(query);
@@ -86,21 +99,28 @@ export default {
         ...query,
         authCode
       }
-      const url = `${query.profile}${shopsAdmin}/mall/order/alxcxPay`
+      let url = ''
+      let contentType = 'application/x-www-form-urlencoded'
+      if (mpvuePlatform === 'wx') {
+        contentType = 'application/json'
+        url = `${query.profile}${shopsAdmin}/order/pay/wxxcxPay/idcode/guest_c3524b8d02f749329498197887127f22`
+      } else if (mpvuePlatform === 'my') {
+        url = `${query.profile}${shopsAdmin}/order/pay/alxcxPay/idcode/guest_c3524b8d02f749329498197887127f22?appSrc=1`
+      }
       request({
         url,
         method: 'POST',
         headers: {
           ...headers,
-          "content-type":  'application/x-www-form-urlencoded'
+          "content-type": contentType
         },
         data,
         success: (result) => {
-          if(!result.data.code) {
+          if(!result.data.code || result.data.code !== '200') {
             showAlert({content: `${result.data.msg}`})
             return
           }
-          const data = result.data
+          const data = result.data.data
           setStorageSync('paymentData', data)
           tradePay({
             // 调用统一收单交易创建接口（alipay.trade.create），获得返回字段支付宝交易号trade_no

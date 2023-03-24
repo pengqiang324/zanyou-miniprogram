@@ -99,7 +99,7 @@ export default {
                 return
             } else {
                 tradePay({ 
-                    paymentData,
+                    data: paymentData,
                     complete: () => {
                         this.hasLoading(false)
                     }
@@ -112,11 +112,10 @@ export default {
             var url = ''
             var contentType = 'application/x-www-form-urlencoded'
             const { price, spuId, name } = this.dataInfo
+            const { payUrl, payShopsApp } = this.$baseApi
             if (this.platForm === 'wx') {
-              const { spuId, name } = getStorageSync('list');
-              
               contentType = 'application/json'
-              url = `http://192.168.1.103:10161/small/program/pay/create/idcode/${this.$baseApi.baseHeader.idcode}`
+              url = `${payUrl}${payShopsApp}/small/program/pay/create/idcode/${this.$baseApi.baseHeader.idcode}`
               body = {
                 ...body,
                 amount: price,
@@ -183,13 +182,20 @@ export default {
             return
         }
 
-        const url = `${query.profile}${shopsAdmin}/mall/order/alxcxPay`
+        let url = ''
+        let contentType = 'application/x-www-form-urlencoded'
+        if (mpvuePlatform === 'wx') {
+          contentType = 'application/json'
+          url = `${query.profile}${shopsAdmin}/order/pay/wxxcxPay/idcode/guest_c3524b8d02f749329498197887127f22`
+        } else if (mpvuePlatform === 'my') {
+          url = `${query.profile}${shopsAdmin}/order/pay/alxcxPay/idcode/guest_c3524b8d02f749329498197887127f22?appSrc=1`
+        }
         request({
             url,
             method: 'POST',
             headers: {
               ...headers,
-              "content-type":  'application/x-www-form-urlencoded'
+              "content-type": contentType
             },
             body
         }).then(result => {

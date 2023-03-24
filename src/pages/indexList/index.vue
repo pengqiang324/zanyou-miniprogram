@@ -1,5 +1,5 @@
 <template>
-    <Global>
+    <!-- <Global> -->
         <view class="page">
             <view class="search skeleton-rect">
                 <view v-if="platForm === 'my'" class="my-search">
@@ -64,7 +64,7 @@
                 </view>
             </view>
         </view>
-    </Global>
+    <!-- </Global> -->
 </template>
 
 <script>
@@ -128,7 +128,6 @@ export default {
         getRect(selector, isAll, index=0) {
             const selectorQuery = my.createSelectorQuery()
             const oDom = isAll ? selectorQuery.selectAll(selector) : selectorQuery.select(selector)
-            console.log('dom', selector, selectorQuery.selectAll(selector))
             oDom.boundingClientRect().exec(
                 (res) => {
                     console.log('获取的位置', res)
@@ -176,7 +175,6 @@ export default {
                 timeout: 10000
             }).then(result => {
                 const { data, code, msg } = typeof result.data === 'string' ? JSON.parse(result.data) : result.data
-                console.log('数据', data)
                 if (code !== '200') {
                     showAlert({
                         title: msg

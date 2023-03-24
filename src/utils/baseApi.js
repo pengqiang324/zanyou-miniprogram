@@ -1,7 +1,9 @@
 export default {
   imgUrl: 'https://t-images.52zanyou.com',
   apiUrl: 'https://t-app-gw.52zanyou.com',
+  payUrl: 'https://t-app-gw.5296live.com', // 支付网关
   shopsAdmin: '/api/app/shops',
+  payShopsApp: '/api/base/shops-app',
   baseHeader: {
     'tagId': 0,
     'page': 1,
